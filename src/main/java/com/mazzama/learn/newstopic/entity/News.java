@@ -2,6 +2,7 @@ package com.mazzama.learn.newstopic.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicUpdate
 @Table(name = "news")
 public class News extends BaseEntity {
     private String title;

@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    active: TEST
+  datasource:
+    url: jdbc:hsqldb:file:data/test/news_topic
+    username: sa
+    password: sa
+    initialization-mode: always
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.HSQLDialect
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true

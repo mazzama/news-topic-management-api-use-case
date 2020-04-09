@@ -26,4 +26,20 @@ public class AbstractController<R extends BaseRequest, S extends BaseResponse, B
     public ResponseEntity<List<S>> findAll() {
         return ResponseEntity.ok(service.findAll());
     }
+
+    @Override
+    public ResponseEntity<S> update(Long id, R requestPayload) {
+        return ResponseEntity.ok(service.update(id, requestPayload));
+    }
+
+    @Override
+    public ResponseEntity deleteById(Long id) {
+        service.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<S> findById(Long id) {
+        return ResponseEntity.ok(service.findById(id));
+    }
 }

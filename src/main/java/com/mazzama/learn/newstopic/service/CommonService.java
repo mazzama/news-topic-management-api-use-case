@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface CommonService<R extends BaseRequest, S extends BaseResponse> {
     S save(R entity);
-    Optional<S> findById(Long id);
+    S update(Long id, R entity);
+    void deleteById(Long id);
+    S findById(Long id);
     List<S> findAll();
 }
