@@ -4,6 +4,7 @@ import com.mazzama.learn.newstopic.dto.request.BaseRequest;
 import com.mazzama.learn.newstopic.dto.response.BaseResponse;
 import com.mazzama.learn.newstopic.service.CommonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class AbstractController<R extends BaseRequest, S extends BaseResponse, B
 
     @Override
     public ResponseEntity<S> save(R request) {
-        return ResponseEntity.ok(service.save(request));
+        return new ResponseEntity<>(service.save(request),HttpStatus.CREATED);
     }
 
     @Override

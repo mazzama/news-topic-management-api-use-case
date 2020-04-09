@@ -36,6 +36,7 @@ class NewsServiceTest {
     @Mock
     private NewsRepository newsRepository;
 
+    private String expectedMessage = "No record exist for given id";
     private List<News> allNews = new ArrayList<>();
     private List<News> filteredNews = new ArrayList<>();
     private List<NewsResponse> allNewsResponses = new ArrayList<>();
@@ -139,21 +140,52 @@ class NewsServiceTest {
         doReturn(true).when(newsRepository).existsById(id);
 
         newsService.deleteById(id);
+        verify(newsRepository, times(1)).existsById(eq(id));
         verify(newsRepository, times(1)).deleteById(eq(id));
     }
 
     @Test
-    public void whenDeleteNewsByIdWithInValidId_shouldReturnException() {
+    public void whenDeleteNewsByIdWithInvalidId_shouldThrowsException() {
         Long id = 5L;
-        String expectedMessage = "No record exist for given id";
 
         doReturn(false).when(newsRepository).existsById(id);
 
         Exception exception = assertThrows(EntityNotFoundException.class, () -> {
            newsService.deleteById(id);
-           verify(newsRepository, times(1)).deleteById(eq(id));
         });
 
+        verify(newsRepository, times(1)).existsById(eq(id));
+        assertTrue(exception.getMessage().contains(expectedMessage));
+    }
+
+    @Test
+    public void whenFindByIdWithValidId_thenReturnNews() {
+        Long id = 1L;
+
+        Optional<News> optionalNews = Optional.of(expectedNews1);
+
+        doReturn(optionalNews).when(newsRepository).findById(id);
+        doReturn(response).when(newsMapper).entityToResponse(optionalNews.get());
+
+        NewsResponse actualResult = newsService.findById(id);
+
+        verify(newsRepository, times(1)).findById(eq(id));
+        assertNotNull(actualResult);
+        assertEquals(actualResult.getId(), optionalNews.get().getId());
+    }
+
+    @Test
+    public void whenFindByIdWithInvalidId_thenThrowsException() {
+        Long id = 5L;
+        Optional<News> optionalEmpty = Optional.empty();
+
+        doReturn(optionalEmpty).when(newsRepository).findById(5L);
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            newsService.findById(id);
+        });
+
+        verify(newsRepository, times(1)).findById(eq(id));
         assertTrue(exception.getMessage().contains(expectedMessage));
     }
 }

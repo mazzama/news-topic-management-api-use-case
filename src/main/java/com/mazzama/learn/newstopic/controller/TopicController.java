@@ -1,27 +1,16 @@
 package com.mazzama.learn.newstopic.controller;
 
-import com.mazzama.learn.newstopic.entity.Topic;
-import com.mazzama.learn.newstopic.repository.TopicRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.mazzama.learn.newstopic.dto.request.TopicRequest;
+import com.mazzama.learn.newstopic.dto.response.TopicResponse;
+import com.mazzama.learn.newstopic.service.impl.TopicService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/topic")
-public class TopicController {
+public class TopicController extends AbstractController<TopicRequest, TopicResponse, TopicService> {
 
-    private TopicRepository topicRepository;
-
-    @Autowired
-    public TopicController(TopicRepository topicRepository) {
-        this.topicRepository = topicRepository;
-    }
-
-    @GetMapping
-    public List<Topic> getAll() {
-        return topicRepository.findAll();
+    public TopicController(TopicService service) {
+        super(service);
     }
 }

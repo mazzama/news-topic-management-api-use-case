@@ -131,11 +131,13 @@
                     <output>file</output>
                     <append>true</append>
                     <excludes>
+                        <exclude>**/config/**</exclude>
                         <exclude>**/constant/**</exclude>
                         <exclude>**/dto/**</exclude>
                         <exclude>**/entity/**/*</exclude>
                         <exclude>**/exception/**</exclude>
                         <exclude>**/mapper/**</exclude>
+                        <exclude>**/newstopic/NewsTopicApplication.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>

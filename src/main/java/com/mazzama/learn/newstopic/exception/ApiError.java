@@ -44,14 +44,14 @@ public class ApiError {
     }
 }
 
-abstract class ApiSubError {
+interface ApiSubError {
 
 }
 
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-class ApiValidationError extends ApiSubError {
+class ApiValidationError implements ApiSubError {
     private String object;
     private String field;
     private Object rejectedValue;
