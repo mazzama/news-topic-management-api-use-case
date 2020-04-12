@@ -5,7 +5,8 @@
 - Filter by news status ("draft", "publish", "delete")
 - Filter news by its topics
 
-## Endpoint List
+## Test Coverage
+![Image](./Docs/TestCoverage.PNG?raw=true)
 
 ## Dependencies Used
 - Spring Boot

@@ -244,7 +244,7 @@ class NewsServiceTest {
         Long id = null;
         String status = "Deleted";
 
-        // Empty Newst
+        // Empty News
         List<News> emptyNews = allNews.stream()
                 .filter(value -> value.getStatus().toString().equalsIgnoreCase(status))
                 .collect(Collectors.toList());
@@ -257,7 +257,7 @@ class NewsServiceTest {
     }
 
     @Test
-    void findAllByStatusAndTopicsIdWithValidStringAndIdNull_shouldThrownException() {
+    void findAllByStatusAndTopicsIdWithValidStringAndIdNull_shouldReturnCorrectNewsResponses() {
         Long id = null;
         String status = "Publish";
 
@@ -271,7 +271,7 @@ class NewsServiceTest {
     }
 
     @Test
-    void findAllByStatusAndTopicsIdValid_shouldReturnCorrectNewResponses() {
+    void findAllByStatusAndTopicsIdValid_shouldReturnCorrectNewsResponses() {
         Long id = 1L;
         String status = "Publish";
 
@@ -300,5 +300,58 @@ class NewsServiceTest {
         assertThat(actualTopicResponseExample, containsInAnyOrder(hasProperty("id", is(id))));
     }
 
+    @Test
+    void updateNewsWithInvalidId_shouldThrowAnException() {
+        Long id = 3L;
+        // Preparing the data
+        NewsRequest newsRequest = new NewsRequest();
+        newsRequest.setTitle("Pemenang Ballon D'or 2020");
+        newsRequest.setDescription("Pemenang Ballon D'or Tahun 2020 telah diumumkan");
+        newsRequest.setId(id);
 
+        Optional<News> emptyNews = Optional.empty();
+
+        doReturn(emptyNews).when(newsRepository).findById(id);
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            newsService.update(id, newsRequest);
+        });
+    }
+
+    @Test
+    void updateNewsWithValidId_shouldReturnUpdatedField() {
+        // Prepare the data
+        Long id = 1L;
+        NewsRequest newsRequest = new NewsRequest();
+        newsRequest.setTitle("Jumlah korban korona per 11 April");
+        newsRequest.setDescription("Berita terbaru mengenai Corona");
+        newsRequest.setId(id);
+
+        News updatedNews = new News();
+        updatedNews.setTitle("Jumlah korban korona per 11 April");
+        updatedNews.setDescription("Berita terbaru mengenai Corona");
+        updatedNews.setId(id);
+
+        News currentNews = new News();
+        currentNews.setTitle("Jumlah korban korona per 10 April");
+        currentNews.setDescription(newsRequest.getDescription());
+        currentNews.setId(id);
+        Optional<News> currentNewsOptional = Optional.of(currentNews);
+
+        NewsResponse newsResponse = new NewsResponse();
+        newsResponse.setTitle(newsRequest.getTitle());
+        newsResponse.setDescription(newsRequest.getDescription());
+        newsResponse.setId(id);
+
+        //Stubing
+        doReturn(currentNewsOptional).when(newsRepository).findById(id);
+        doReturn(updatedNews).when(newsMapper).requestToEntity(newsRequest);
+        doReturn(updatedNews).when(newsRepository).save(updatedNews);
+        doReturn(newsResponse).when(newsMapper).entityToResponse(updatedNews);
+
+        // Test
+        NewsResponse actualResult = newsService.update(id, newsRequest);
+        assertEquals(actualResult.getTitle(), newsRequest.getTitle());
+        assertEquals(actualResult.getId(), newsRequest.getId());
+    }
 }
