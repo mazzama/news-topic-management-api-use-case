@@ -36,14 +36,10 @@ public abstract class AbstractCommonService<E extends BaseEntity, R extends Base
         Optional<E> current = repository.findById(id);
 
         if (current.isPresent()) {
-            E currentModel = current.get();
-
             E updatedRequest = mapper.requestToEntity(request);
-            updatedRequest.setCreatedDate(currentModel.getCreatedDate());
-            updatedRequest.setVersion(currentModel.getVersion() + 1);
 
-            currentModel = repository.save(updatedRequest);
-            return mapper.entityToResponse(currentModel);
+            updatedRequest = repository.save(updatedRequest);
+            return mapper.entityToResponse(updatedRequest);
         } else {
             throw new EntityNotFoundException(MESSAGE);
         }

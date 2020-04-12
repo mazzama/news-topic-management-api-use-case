@@ -19,8 +19,8 @@ spring:
         dialect: org.hibernate.dialect.HSQLDialect
     generate-ddl: true
     hibernate:
-      ddl-auto: validate
-    show-sql: true
+      ddl-auto: create-drop
+    show-sql: false
 
 logging:
   level:

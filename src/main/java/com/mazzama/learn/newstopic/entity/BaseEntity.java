@@ -15,9 +15,6 @@ public class BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Version
-    private Long version;
-
     @CreationTimestamp
     @Column(updatable = false)
     private Timestamp createdDate;
