@@ -2,6 +2,7 @@ package com.mazzama.learn.newstopic.service.impl;
 
 import com.mazzama.learn.newstopic.dto.request.NewsRequest;
 import com.mazzama.learn.newstopic.dto.response.NewsResponse;
+import com.mazzama.learn.newstopic.dto.response.TopicResponse;
 import com.mazzama.learn.newstopic.entity.News;
 import com.mazzama.learn.newstopic.entity.Status;
 import com.mazzama.learn.newstopic.entity.Topic;
@@ -17,9 +18,10 @@ import org.springframework.test.context.ActiveProfiles;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -48,17 +50,20 @@ class NewsServiceTest {
     @BeforeEach
     void setUp() {
         // Model
+        // Builder for parent class's field still experimental feature in Lombok :D
+        // https://projectlombok.org/features/experimental/SuperBuilder
         Topic topic1 = Topic.builder().name("Olahraga").description("Topic olahraga").build();
+        topic1.setId(1L);
         Topic topic2 = Topic.builder().name("Headline").description("Berita Terbaru").build();
+        topic2.setId(2L);
 
         Set<Topic> topicSet = new HashSet<>();
         topicSet.add(topic1);
 
+        // Expected News
         expectedNews1 = News.builder()
                 .title("Pemenang Ballon D'or").description("Pemenang Ballon D'or telah diumumkan")
                 .status(Status.PUBLISH).topics(topicSet).build();
-        // Builder for parent class's field still experimental feature in Lombok :D
-        // https://projectlombok.org/features/experimental/SuperBuilder
         expectedNews1.setId(1L);
 
         topicSet.add(topic2);
@@ -70,12 +75,28 @@ class NewsServiceTest {
         allNews.addAll(Arrays.asList(expectedNews1, expectedNews2));
         filteredNews.add(expectedNews1);
 
-        // Response DTO
+        // TopicResponse DTO
+        TopicResponse topicResponse1 = new TopicResponse();
+        topicResponse1.setId(topic1.getId());
+        topicResponse1.setName(topic1.getName());
+        topicResponse1.setDescription(topic1.getDescription());
+
+        Set<TopicResponse> setTopicResponse1 = new HashSet<>();
+        setTopicResponse1.add(topicResponse1);
+
+        TopicResponse topicResponse2 = new TopicResponse();
+        topicResponse2.setId(topic2.getId());
+        topicResponse2.setName(topic2.getName());
+        topicResponse2.setDescription(topic2.getDescription());
+
+
+        // NewResponse DTO
         response = new NewsResponse();
         response.setId(1L);
         response.setDescription("Pemenang Ballon D'or telah diumumkan");
         response.setTitle("Pemenang Ballon D'or");
         response.setStatus(Status.PUBLISH);
+        response.setTopics(setTopicResponse1);
 
         NewsResponse newsResponse = new NewsResponse();
         newsResponse.setId(2L);
@@ -134,6 +155,21 @@ class NewsServiceTest {
     }
 
     @Test
+    public void whenFindAllNewsByStatus_thenThrowAnException() {
+        Status status = Status.DELETED;
+        String expectedMessage = "News with status: "+ status.getStatus() + " not found.";
+        List<News> emptyNews = new ArrayList<>();
+
+        doReturn(emptyNews).when(newsRepository).findAllByStatus(status);
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            newsService.findByStatus("Deleted");
+        });
+
+        assertTrue(exception.getMessage().contains(expectedMessage));
+    }
+
+    @Test
     public void whenDeleteNewsByIdWithValidId_thenReturnVoid() {
         Long id = 1L;
 
@@ -188,4 +224,81 @@ class NewsServiceTest {
         verify(newsRepository, times(1)).findById(eq(id));
         assertTrue(exception.getMessage().contains(expectedMessage));
     }
+
+    @Test
+    void findAllByStatusAndTopicsIdWithEmptyStringAndIdNull() {
+        Long id = null;
+        String status = "";
+
+        doReturn(allNews).when(newsRepository).findAll();
+        doReturn(allNewsResponses).when(newsMapper).mappingList(allNews);
+
+        List<NewsResponse> actualResult = newsService.findAllByStatusAndTopicsId(status, id);
+
+        verify(newsRepository, times(1)).findAll();
+        assertThat(actualResult.size(), greaterThan(0));
+    }
+
+    @Test
+    void findAllByStatusAndTopicsIdWithInvalidStringAndIdNull_shouldThrownException() {
+        Long id = null;
+        String status = "Deleted";
+
+        // Empty Newst
+        List<News> emptyNews = allNews.stream()
+                .filter(value -> value.getStatus().toString().equalsIgnoreCase(status))
+                .collect(Collectors.toList());
+
+        doReturn(emptyNews).when(newsRepository).findAllByStatus(Status.DELETED);
+
+        assertThrows(EntityNotFoundException.class, () -> {
+            newsService.findAllByStatusAndTopicsId(status, id);
+        });
+    }
+
+    @Test
+    void findAllByStatusAndTopicsIdWithValidStringAndIdNull_shouldThrownException() {
+        Long id = null;
+        String status = "Publish";
+
+        //using Filtered news
+        doReturn(filteredNews).when(newsRepository).findAllByStatus(Status.PUBLISH);
+        doReturn(filteredNewsResponses).when(newsMapper).mappingList(filteredNews);
+
+        List<NewsResponse> actualResponses = newsService.findAllByStatusAndTopicsId(status, id);
+
+        assertThat(actualResponses, containsInAnyOrder(hasProperty("status", is(Status.PUBLISH))));
+    }
+
+    @Test
+    void findAllByStatusAndTopicsIdValid_shouldReturnCorrectNewResponses() {
+        Long id = 1L;
+        String status = "Publish";
+
+        doReturn(filteredNews).when(newsRepository).findAllByStatusAndTopicsId(Status.PUBLISH, id);
+        doReturn(filteredNewsResponses).when(newsMapper).mappingList(filteredNews);
+
+        List<NewsResponse> actualResponses = newsService.findAllByStatusAndTopicsId(status, id);
+        assertThat(actualResponses, containsInAnyOrder(hasProperty("status", is(Status.PUBLISH))));
+
+        // Get TopicResponse with actual id
+        Set<TopicResponse> actualTopicResponseExample = actualResponses.get(0).getTopics();
+        assertThat(actualTopicResponseExample, containsInAnyOrder(hasProperty("id", is(id))));
+    }
+
+    @Test
+    void findAllByStatusAndIdWithStatusEmptyAndIdNotNull() {
+        Long id = 1L;
+        String status = "";
+
+        doReturn(filteredNews).when(newsRepository).findAllByTopicsId(id);
+        doReturn(filteredNewsResponses).when(newsMapper).mappingList(filteredNews);
+
+        List<NewsResponse> actualResponses = newsService.findAllByStatusAndTopicsId(status, id);
+        // Get TopicResponse with actual id
+        Set<TopicResponse> actualTopicResponseExample = actualResponses.get(0).getTopics();
+        assertThat(actualTopicResponseExample, containsInAnyOrder(hasProperty("id", is(id))));
+    }
+
+
 }

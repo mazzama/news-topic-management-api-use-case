@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
-@Profile("DEV")
+@Profile({"DEV", "TEST"})
 @Slf4j
 public class DataPopulator {
 

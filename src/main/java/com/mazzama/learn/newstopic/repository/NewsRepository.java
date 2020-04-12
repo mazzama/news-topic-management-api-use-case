@@ -9,4 +9,8 @@ import java.util.List;
 @Repository
 public interface NewsRepository extends CommonRepository<News> {
     List<News> findAllByStatus(Status status);
+
+    List<News> findAllByTopicsId(Long id);
+
+    List<News> findAllByStatusAndTopicsId(Status status, Long id);
 }

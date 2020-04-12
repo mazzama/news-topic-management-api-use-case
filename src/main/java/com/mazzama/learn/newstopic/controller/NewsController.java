@@ -21,4 +21,10 @@ public class NewsController extends AbstractController<NewsRequest, NewsResponse
         List<NewsResponse> responses = service.findByStatus(status);
         return ResponseEntity.ok(responses);
     }
+
+    @GetMapping(params = {"topic", "status"})
+    public ResponseEntity<List<NewsResponse>> findNewsByTopicAndStatus(@RequestParam(value = "topic", required = false, defaultValue = "") Long id, @RequestParam(value = "status", required = false, defaultValue = "") String status) {
+        List<NewsResponse> responses = service.findAllByStatusAndTopicsId(status, id);
+        return ResponseEntity.ok(responses);
+    }
 }

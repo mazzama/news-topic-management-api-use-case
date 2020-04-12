@@ -138,4 +138,16 @@ class NewsControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void findNewsByTopicAndStatus() throws Exception {
+        String status = "Draft";
+
+        doReturn(filteredNewsResponses).when(newsService).findAllByStatusAndTopicsId(status, null);
+        mockMvc.perform(get("/api/news")
+                .param("status", status)
+                .param("topic", "")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].status", containsInAnyOrder("DRAFT", "DRAFT")));
+    }
 }
