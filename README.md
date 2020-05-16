@@ -1,4 +1,5 @@
 # News & Topic Management Use Case
+![Java CI with Maven](https://github.com/mazzama/news-topic-management-api-use-case/workflows/Java%20CI%20with%20Maven/badge.svg)
 ## Requirements
 - News & Topic Management (CRUD)
 - A news can contains multiple tags and A tags can contains multiple news (Many to many relationship)
